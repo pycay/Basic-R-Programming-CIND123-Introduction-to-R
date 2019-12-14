@@ -1,0 +1,144 @@
+---
+title: 'CIND 123 SUMMER 2018 - Assignment #3'
+author: "Paul Ycay"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+Use RStudio for this assignment. 
+Edit the file `assignment-4.Rmd` and insert your R code where wherever you see the string "INSERT YOUR ANSWER HERE"
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. 
+
+
+## Sample Question and Solution
+
+Use `seq()` to create the vector $(2,4,6,\ldots,20)$.
+
+```{r}
+#Insert your code here.
+seq(2,20,by = 2)
+```
+
+In this assignment, questions 1 - 4 make use of data that is provided by the
+`mosaic` package.  (install mosaic package and load KidsFeet using data(KidsFeet) ). 
+```{r}
+install.packages('mosaic',repos = "http://cran.us.r-project.org")
+library(mosaic)
+data(KidsFeet)
+```
+
+
+## Question 1 - 30%
+This question makes use of package "plm", and load Crime dataset as following:
+```{r load_packages}
+install.packages("plm",repos = "http://cran.us.r-project.org")
+library(plm) 
+data(Crime)
+```
+
+a) Display the first 8 rows of crime and make note of all the variables and print all column (variable) names. Display summary of each variable.
+```{r}
+head(Crime,8)
+summary(head(Crime,8))
+```
+
+b) Calculate the mean,variance and standard deviation of tax revenue per capita (taxpc) by omitting the missing values, if any.
+```{r}
+mean(Crime$taxpc,na.rm=TRUE)
+var(Crime$taxpc,na.rm=TRUE)
+sd(Crime$taxpc,na.rm=TRUE)
+
+```
+
+c) Use `density` and `smsa` variables build a multiple linear regression model to predict tax per capita (taxpc), display a summary of your model indicating Residuals, Coefficients..etc. What can you say about your model? 
+```{r}
+model<-lm(taxpc~density+smsa,data=Crime)
+summary(model)
+```
+
+d)Based on the output of your model, write the equations based on the intercept and factors of `smsa` when `density` is set to 2.4. and compare the result with `predict()` function. Hint: Explore `predict()` function
+```{r}
+smsaYES<-29.5615-0.2345*2.4+11.280*1
+smsaYES
+smsaNO<-29.5615-0.2345*2.4
+smsaNO
+dfyes<-data.frame(density=c(2.4),smsa=c('yes'))
+predict(model,dfyes)
+dfno<-data.frame(density=c(2.4),smsa=c('no'))
+predict(model,dfno)
+#the results are very close to each other
+```
+
+e)Find Pearson correlation between density and tax per capita; between density and police per capita (polpc) Please comment on the result with a sentence.
+```{r}
+cor_density_tax<-cor(Crime$density,Crime$taxpc)
+cor_density_tax
+cor_density_police<-cor(Crime$density,Crime$polpc)
+cor_density_police
+#density vs. tax has a weak but positive correlation, dnsity vs police has a weak but negative correlation
+```
+f)Write the correlation matrix of the variables: avgsen, polpc, density, taxpc. Hint: Explore the variables by ?Crime. Comment on the result with a sentence.
+```{r}
+cor(Crime[,7:10])
+```
+
+## Question 2 -30%
+ 
+a) First and second midterm grades of some students are given as c(55,76,48,58,80,75,32,22) and c(85,76,78,88,90,95,42,31). Set R variables `first` and `second` respectively.
+```{r}
+first <- c(85,76,78,88,90,95,42,31)
+second <- c(55,76,48,58,80,75,32,22)
+```
+b) Apply the lm() function to observe the relationship between the first and the second midterm grades. Hint: Second midterm is the response variable.
+```{r}
+model2 <- lm(second~first)
+summary(model2)
+```
+
+c) Find the second midterm grade of a student given that his/her first midterm grade is 72. Print the result by using print() function. 
+```{r}
+result <-  predict(model2,data.frame(first = 72))
+print(result)
+```
+
+## Question 3 - 40%
+
+$\pi$ appears in the formula for the standard normal distribution, the most important probability distribution in statistics. Why not give it a try to calculate $\pi$ using statistics! In fact, you'll use a simulation technique called the *Monte Carlo Method*.
+
+Recall that the area of a circle of radius $r$ is $A = \pi r^2$. Therefore the area of a circle of radius 1, aka a *unit circle*, is $\pi$. You'll compute an approximation to the area of this circle using the Monte Carlo Method.
+
+a) The Monte Carlo Method uses random numbers to simulate some process. Here the process is throwing darts at a square. Assume the darts are uniformly distributed over the square. Imagine a unit circle enclosed by a square whose sides are of length 2. Set an R variable `area.square` to be the area of a square whose sides are of length 2.
+
+```{r}
+area.square <- 2*2
+area.square
+```
+b) The points of the square can be given x-y coordinates. Let both x and y range from -1 to +1 so that the square is centred on the origin of the coordinate system. Throw some darts at the square by generating random numeric vectors x and y, each of length `N = 10,000`. Set R variables `x` and `y` each to be uniformly distributed random numbers in the range -1 to +1.
+(hint: runif() generates random number for the uniform distribution)
+```{r}
+N  <- 10000
+x <- runif(N, min=-1, max=1)
+y <- runif(N, min=-1, max=1)
+```
+c) Now count how many darts landed inside the unit circle. Recall that a point is inside the unit circle when $x^2 + y^2 < 1$. Save the result of successful hits in a variable named hit. 
+(hint: a for loop over the length of x and y is one option to reach hit)
+```{r}
+hit <- 0
+for (i in 1:N){
+  if((x[i]^2+y[i]^2)<=1) 
+    hit<-hit+1}
+print (hit)
+```
+d) The probability that a dart hits inside the circle is proportional to the ratio of the area of the circle to the area of the square. Use this fact to calculate an approximation to $\pi$ and print the result
+```{r}
+pi <- (4*hit)/N
+print(pi)
+```
+Wow you got the first estimate for `pi` $\pi$, congratulations you have completed the first run of the Monte Carlo simulation.
+If there is further interest put all the above logic in a function, and call it 50 times store the results in a vector called pi then take the mean of pi vector. 
+
